@@ -3,7 +3,9 @@
 
 """
 NebTech Cloud Dashboard
------------------------
+Auteur : Damien RECULE
+Date : 01/12/2025
+Version : 3.1
 
 Fonctionnalités :
 - Authentification + 2FA
