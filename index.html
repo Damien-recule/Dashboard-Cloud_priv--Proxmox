@@ -1,0 +1,1345 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>NovaSolutions - Déploiement</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      /* ----------------------------- */
+      /* CALENDRIER                    */
+      /* ----------------------------- */
+      .cal-day {
+        text-align: center;
+        padding: 4px 0;
+        color: #f3f4f6;
+        border-radius: 6px;
+        transition: 0.2s;
+      }
+      .cal-day:hover {
+        background: #374151;
+        cursor: pointer;
+      }
+      .cal-day-empty {
+        padding: 4px 0;
+      }
+      .cal-today {
+        background: #22c55e;
+        color: #111827 !important;
+        font-weight: 700;
+      }
+
+      /* ----------------------------- */
+      /* BASE UI                       */
+      /* ----------------------------- */
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        background-image: url("/static/background.jpg");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        color: #111827;
+      }
+      .card {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 28px 32px;
+        background: #ffffff;
+        border-radius: 18px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+      }
+      h1 {
+        text-align: center;
+        font-size: 1.9rem;
+        margin-bottom: 4px;
+      }
+      h2 {
+        font-size: 1.3rem;
+        margin-top: 0;
+        margin-bottom: 10px;
+      }
+      .subtitle {
+        text-align: center;
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-bottom: 20px;
+      }
+      label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 4px;
+        display: block;
+        color: #374151;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 9px 10px;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        background: #f9fafb;
+        font-size: 0.9rem;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px 24px;
+        margin-top: 18px;
+      }
+      .grid-1 {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-top: 10px;
+      }
+      .buttons {
+        display: flex;
+        gap: 12px;
+        margin-top: 22px;
+        flex-wrap: wrap;
+      }
+      button {
+        flex: 1;
+        padding: 11px 0;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+      }
+      button[name="action"][value="plan"] {
+        background: #2563eb;
+        color: white;
+      }
+      button[name="action"][value="apply"] {
+        background: #16a34a;
+        color: white;
+      }
+      .external-btn {
+        flex: 1;
+        padding: 11px 0;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        background: #1f2937;
+        color: white;
+      }
+      .template-info {
+        margin-top: 18px;
+        padding: 14px 16px;
+        background: #eff6ff;
+        border-radius: 12px;
+        border: 1px solid #bfdbfe;
+      }
+      .output-box {
+        margin-top: 26px;
+        padding: 16px;
+        background: #111827;
+        color: #d1fae5;
+        border-radius: 12px;
+        white-space: pre-wrap;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+
+      /* ----------------------------- */
+      /* LOGS                          */
+      /* ----------------------------- */
+      .log-box {
+        background: #111827;
+        color: #d1fae5;
+        padding: 12px;
+        border-radius: 10px;
+        height: 380px;
+        overflow-y: auto;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+      }
+      .log-box pre {
+        white-space: pre-wrap;
+        padding-right: 10px;
+      }
+
+      /* ----------------------------- */
+      /* PANNEAU STATUS + MONITORING   */
+      /* ----------------------------- */
+      #status-panel {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        width: 200px;
+        background: white;
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        font-family: sans-serif;
+        z-index: 999;
+        font-size: 0.85rem;
+      }
+      .status-title {
+        font-size: 15px;
+        margin: 0 0 10px 0;
+      }
+      .dot {
+        height: 12px;
+        width: 12px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-left: 4px;
+      }
+      .green {
+        background: #16a34a;
+      }
+      .red {
+        background: #dc2626;
+      }
+      .gray {
+        background: #9ca3af;
+      }
+      #monitor-panel {
+        background: #1f2937;
+        color: white;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid #374151;
+        margin-top: 12px;
+        font-size: 0.78rem;
+      }
+      #monitor-panel .title {
+        font-weight: bold;
+        margin-bottom: 8px;
+        color: #22c55e;
+      }
+      #monitor-panel .line {
+        margin-bottom: 6px;
+      }
+
+      /* ----------------------------- */
+      /* CALENDRIER PANEL              */
+      /* ----------------------------- */
+      #calendar-panel {
+        position: fixed;
+        left: 20px;
+        bottom: 20px;
+        width: 260px;
+        background: rgba(17, 24, 39, 0.95);
+        color: #f9fafb;
+        border-radius: 14px;
+        padding: 12px 14px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        z-index: 998;
+        font-size: 0.8rem;
+      }
+      #calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+      }
+      #cal-month {
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+      #cal-time {
+        font-size: 0.85rem;
+        color: #a5b4fc;
+      }
+      #cal-date {
+        font-size: 0.8rem;
+        color: #e5e7eb;
+        margin-bottom: 8px;
+      }
+      #calendar-panel table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.72rem;
+      }
+      #calendar-panel th {
+        padding: 3px;
+        font-weight: 500;
+        color: #9ca3af;
+      }
+      #calendar-panel th:nth-child(6),
+      #calendar-panel th:nth-child(7) {
+        color: #fda4af;
+      }
+
+      /* ----------------------------- */
+      /* VM LIST                       */
+      /* ----------------------------- */
+      #vm-card {
+        max-width: 900px;
+        margin: 0 auto 30px auto;
+        padding: 20px 24px;
+        background: #ffffff;
+        border-radius: 18px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+      }
+      #vm-node-selector {
+        padding: 6px 8px;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        background: #f9fafb;
+        width: 100%;
+        margin-bottom: 10px;
+      }
+      #vm-list table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+      }
+      #vm-list th,
+      #vm-list td {
+        padding: 6px 8px;
+        text-align: left;
+      }
+      #vm-list tr:nth-child(even) {
+        background: #f9fafb;
+      }
+      #vm-list th {
+        border-bottom: 1px solid #d1d5db;
+      }
+      .btn-vm {
+        padding: 4px 8px;
+        border-radius: 6px;
+        border: none;
+        font-size: 0.8rem;
+        cursor: pointer;
+        margin-right: 4px;
+      }
+      .btn-vm-start {
+        background: #16a34a;
+        color: white;
+      }
+      .btn-vm-stop {
+        background: #dc2626;
+        color: white;
+      }
+      .btn-vm-reset {
+        background: #fbbf24;
+        color: #111827;
+      }
+
+      /* ----------------------------- */
+      /* LOGS PANEL                    */
+      /* ----------------------------- */
+      #logs-panel {
+        position: fixed;
+        right: 20px;
+        top: 150px;
+        width: 420px;
+      }
+      #logs-panel h3 {
+        color: white;
+        text-align: center;
+        margin-top: 0;
+        margin-bottom: 10px;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+      }
+      #logs-panel .log-buttons {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+
+      /* ----------------------------- */
+      /* RESPONSIVE                    */
+      /* ----------------------------- */
+      @media (max-width: 1100px) {
+        #logs-panel {
+          position: static;
+          width: auto;
+          margin: 20px;
+        }
+        #status-panel,
+        #calendar-panel {
+          position: static;
+          width: auto;
+          margin: 10px auto;
+        }
+        .card,
+        #vm-card {
+          margin: 20px 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- CALENDRIER EN BAS À GAUCHE -->
+    <div id="calendar-panel">
+      <div id="calendar-header">
+        <div id="cal-month"></div>
+        <div id="cal-time"></div>
+      </div>
+      <div id="cal-date"></div>
+      <table>
+        <thead>
+          <tr>
+            <th>L</th>
+            <th>M</th>
+            <th>M</th>
+            <th>J</th>
+            <th>V</th>
+            <th>S</th>
+            <th>D</th>
+          </tr>
+        </thead>
+        <tbody id="cal-body"></tbody>
+      </table>
+    </div>
+
+    <!-- STATUTS À GAUCHE -->
+    <div id="status-panel">
+      <h3 class="status-title">État des services</h3>
+      <div id="status-terraform">
+        Terraform : <span class="dot gray"></span>
+      </div>
+      <div id="status-ansible">
+        Ansible ---: <span class="dot gray"></span>
+      </div>
+      <div id="status-jenkins">
+        Jenkins --: <span class="dot gray"></span>
+      </div>
+      <div id="status-graylog">
+        Graylog --: <span class="dot gray"></span>
+      </div>
+      <div id="status-docker">
+        Docker ---: <span class="dot gray"></span>
+      </div>
+      <div id="status-pve1">
+        PVE01 --: <span class="dot gray"></span>
+      </div>
+      <div id="status-pve2">
+        PVE02 --: <span class="dot gray"></span>
+      </div>
+      <div id="status-pve3">
+        PVE03 --: <span class="dot gray"></span>
+      </div>
+
+      <div id="monitor-panel">
+        <div class="title">Monitoring Proxmox</div>
+        <div id="mon-pve01" class="line">PVE01 : ...</div>
+        <div id="mon-pve02" class="line">PVE02 : ...</div>
+        <div id="mon-pve03" class="line">PVE03 : ...</div>
+      </div>
+    </div>
+
+    <!-- LOGO -->
+    <div style="text-align:center; margin-bottom:20px; margin-top:10px;">
+      <img
+        src="/static/logo.png"
+        alt="NebTech Logo"
+        style="width:180px; opacity:0.95"
+      />
+    </div>
+
+    <!-- CARD PRINCIPALE -->
+    <div class="card">
+      <h1>NovaSolutions - Déploiement</h1>
+      <p class="subtitle">
+        <span style="color:#22c55e; font-weight:bold;">
+          Projet de fin d’étude "Mise en place d'un Cloud privé"
+        </span>
+        : <strong>RECULE Damien</strong>
+      </p>
+
+      <form method="POST">
+        <div class="grid-1">
+          <div>
+            <label>Template à déployer</label>
+            <select name="module">
+  {% for key, tpl in TEMPLATES_INFO.items() %}
+  <option value="{{ key }}">{{ tpl.name }} (ID {{ tpl.template_id }})</option>
+  {% endfor %}
+
+  <option disabled>────────── Groupes de déploiement ──────────</option>
+
+  {% for group in deployment_groups %}
+  <option value="group_{{ group }}">Groupe : {{ group }}</option>
+  {% endfor %}
+</select>
+
+          </div>
+
+          {% if template_info %}
+          <div class="template-info">
+            <h3>{{ template_info.name }}</h3>
+            <p>{{ template_info.description }}</p>
+            <ul>
+              {% for item in template_info.details %}
+              <li>✔ {{ item }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Paramètres VM -->
+        <div class="grid">
+          <div>
+            <label>Nom de la VM</label>
+            <input name="vm_name" value="{{ form.vm_name }}" required />
+          </div>
+
+          <div>
+            <label>ID du template</label>
+            <input
+              type="text"
+              name="template_id"
+              id="template_id"
+              value="{{ form.template_id }}"
+              required
+            />
+            <input type="hidden" name="template_ids" id="template_ids" />
+          </div>
+
+          <div>
+            <label>ID de la VM</label>
+            <input name="vm_id" value="{{ form.vm_id }}" required />
+          </div>
+
+          <div>
+            <label>CPU</label>
+            <input name="cpu" value="{{ form.cpu }}" required />
+          </div>
+
+          <div>
+            <label>RAM (MB)</label>
+            <input name="ram" value="{{ form.ram }}" required />
+          </div>
+
+          <div>
+            <label>Disque (GB)</label>
+            <input name="disk" value="{{ form.disk }}" required />
+          </div>
+
+          <div>
+            <label>Datastore</label>
+            <!-- Forcé à vmstore côté backend, mais on l’affiche pour info -->
+            <input type="text" value="vmstore" disabled />
+            <input type="hidden" name="datastore" value="vmstore" />
+          </div>
+
+          <div>
+            <label>Interfaces réseau</label>
+            <input name="bridge" value="{{ form.bridge }}" required />
+          </div>
+
+          <div>
+            <label>Nœud Proxmox</label>
+            <select name="node" id="node" required>
+              <option
+                value="pve01"
+                {% if form.node == "pve01" %}selected{% endif %}
+              >
+                pve01
+              </option>
+              <option
+                value="pve02"
+                {% if form.node == "pve02" %}selected{% endif %}
+              >
+                pve02
+              </option>
+              <option
+                value="pve03"
+                {% if form.node == "pve03" %}selected{% endif %}
+              >
+                pve03
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Boutons -->
+        <div class="buttons">
+          <button type="submit" name="action" value="plan">
+            Terraform PLAN
+          </button>
+          <button type="submit" name="action" value="apply">
+            Terraform APPLY
+          </button>
+
+          <button
+            type="button"
+            class="external-btn"
+            onclick="window.open('http://192.168.1.62:8080','_blank')"
+          >
+            Accéder à Jenkins
+          </button>
+
+          <button
+            type="button"
+            class="external-btn"
+            onclick="window.open('https://192.168.1.134:4200','_blank')"
+          >
+            Terminal Ansible (SSH)
+          </button>
+        </div>
+      </form>
+
+      {% if output %}
+      <div class="output-box">
+        {{ output }}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- LISTE DES VM -->
+    <div id="vm-card">
+      <h2 style="text-align: center">Machines Virtuelles Proxmox</h2>
+      <select id="vm-node-selector" onchange="loadVMs()">
+        <option value="pve01">PVE01</option>
+        <option value="pve02">PVE02</option>
+        <option value="pve03">PVE03</option>
+      </select>
+      <div id="vm-list" style="margin-top: 10px;">Chargement...</div>
+    </div>
+
+    <!-- ANSIBLE PANEL -->
+    <div class="card" style="max-width:900px; margin:20px auto;">
+      <h2 style="text-align:center;">Ansible Automation</h2>
+      <div style="display:flex; gap:10px; margin-bottom:10px;">
+        <button class="external-btn" onclick="runPlay('ping')">
+          Test de connectivité (ping.yml)
+        </button>
+        <button class="external-btn" onclick="runPlay('maj')">
+          Mise à jour Linux (maj.yml)
+        </button>
+      </div>
+      <pre
+        id="ansible-output"
+        style="
+          background:#111827;
+          color:#d1fae5;
+          padding:12px;
+          border-radius:10px;
+          height:220px;
+          overflow:auto;
+          white-space: pre-wrap;
+          font-size:0.85rem;
+        "
+      >En attente…</pre>
+    </div>
+
+    <!-- LOGS PANEL -->
+    <div id="logs-panel">
+      <h3>Logs Proxmox</h3>
+      <div class="log-buttons">
+        <button onclick="loadLogs('pve01')" class="external-btn">PVE01</button>
+        <button onclick="loadLogs('pve02')" class="external-btn">PVE02</button>
+        <button onclick="loadLogs('pve03')" class="external-btn">PVE03</button>
+      </div>
+      <div class="log-box">
+        <pre id="log-output" class="log-content"></pre>
+      </div>
+    </div>
+
+<!-- ============================== -->
+<!-- PANNEAU OUTILS & AUTOMATISATION (À DROITE, SOUS LES LOGS) -->
+<!-- ============================== -->
+
+<div id="tools-panel">
+    <div class="dashboard-card">
+        <h3 class="card-title">Outils & Automatisation</h3>
+
+        <!-- BOUTON GRAYLOG -->
+        <button class="card-btn"
+                onclick="window.open('http://192.168.1.172:9000','_blank')">
+            Accéder à Graylog
+        </button>
+
+        <!-- BOUTON DEPLOIEMENT ANSIBLE -->
+        <button class="card-btn highlighted"
+                onclick="window.location.href='/ansible/deploy'">
+            Déploiement Ansible
+        </button>
+    </div>
+</div>
+
+<style>
+#tools-panel {
+    position: fixed;
+    right: 20px;
+    top: 660px;  /* Juste sous la fenêtre des logs */
+    width: 420px;  /* même largeur que les logs */
+    z-index: 500;
+}
+
+.dashboard-card {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    padding: 20px;
+    border-radius: 14px;
+    box-shadow: 0 0 25px rgba(0,0,0,0.35);
+}
+
+.card-title {
+    font-size: 1.1rem;
+    color: #38bdf8;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.card-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    background: #1e293b;
+    color: #e5e7eb;
+    font-size: 0.95rem;
+    font-weight: bold;
+    margin-top: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.card-btn:hover {
+    background: #334155;
+}
+
+.card-btn.highlighted {
+    background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+    color: black;
+}
+
+.card-btn.highlighted:hover {
+    filter: brightness(1.13);
+}
+</style>
+
+
+    <!-- GROUPES DE DÉPLOIEMENT -->
+    <div class="card" style="max-width:420px; margin:20px auto;">
+      <h2 style="text-align:center;">Groupes de déploiement</h2>
+      <div id="groups-list">
+        {% if deployment_groups %}
+        <ul>
+          {% for g in deployment_groups %}
+          <li>{{ g }}</li>
+          {% endfor %}
+        </ul>
+        <p style="font-size:0.8rem; color:#6b7280;">
+          Pour déployer un groupe, sélectionnez-le dans "Template à déployer"
+          puis lancez Terraform PLAN / APPLY.
+        </p>
+        {% else %}
+        <em>Aucun groupe défini pour le moment.</em>
+        {% endif %}
+      </div>
+
+      <hr style="margin:12px 0;" />
+
+      <h3 style="font-size:1rem; margin-top:0;">Créer un nouveau groupe</h3>
+
+      <div>
+        <label>Nom du groupe</label>
+        <input type="text" id="new-group-name" placeholder="Ex : LAB-SIEM" />
+      </div>
+
+      <div style="margin-top:8px;">
+        <label>Templates inclus</label>
+        <select
+          id="new-group-modules"
+          multiple
+          size="12"
+          style="width:100%; padding:6px; border-radius:8px; border:1px solid #d1d5db;"
+        >
+          {% for key, tpl in TEMPLATES_INFO.items() %}
+          <option value="{{ key }}">
+            {{ tpl.name }} — ID: {{ tpl.template_id }}
+          </option>
+          {% endfor %}
+        </select>
+
+        <small style="color:#6b7280;"
+          >Maintiens Ctrl (ou Cmd) pour sélectionner plusieurs
+          templates.</small
+        >
+      </div>
+
+      <button
+        type="button"
+        class="external-btn"
+        style="margin-top:10px;"
+        onclick="createGroup()"
+      >
+        ➕ Créer le groupe
+      </button>
+    </div>
+
+    <!-- ACCÈS RAPIDE PROXMOX -->
+    <div
+      id="pve-access-panel"
+      style="
+        position: fixed;
+        left: 20px;
+        bottom: 300px;
+        width: 200px;
+        background: white;
+        border-radius: 12px;
+        padding: 14px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        font-family: sans-serif;
+        z-index: 998;
+        font-size: 0.85rem;
+      "
+    >
+      <h3 style="margin:0 0 10px 0; font-size:15px;">Accès Proxmox</h3>
+      <button
+        class="external-btn"
+        style="width:100%; margin-bottom:8px;"
+        onclick="window.open('https://192.168.1.193:8006','_blank')"
+      >
+        🌐 PVE01
+      </button>
+      <button
+        class="external-btn"
+        style="width:100%; margin-bottom:8px;"
+        onclick="window.open('https://192.168.1.194:8006','_blank')"
+      >
+        🌐 PVE02
+      </button>
+      <button
+        class="external-btn"
+        style="width:100%;"
+        onclick="window.open('https://192.168.1.195:8006','_blank')"
+      >
+        🌐 PVE03
+      </button>
+    </div>
+
+    <!-- ============================== -->
+    <!-- SCRIPTS                        -->
+    <!-- ============================== -->
+
+    <!-- Mapping template → ID Proxmox -->
+    <script>
+      const TEMPLATE_IDS = {
+        tpl_300: 300,
+        tpl_301: 301,
+        tpl_302: 302,
+        tpl_303: 303,
+        tpl_304: 304,
+        tpl_305: 305,
+        tpl_306: 306,
+        tpl_307: 307,
+        tpl_308: 308,
+        tpl_309: 309,
+        tpl_310: 310,
+        tpl_311: 311,
+        tpl_312: 312,
+        tpl_313: 313,
+        tpl_314: 314,
+        tpl_315: 315,
+        tpl_316: 316,
+        tpl_317: 317,
+        tpl_318: 318,
+        tpl_319: 319,
+        tpl_320: 320,
+        tpl_321: 321,
+        tpl_322: 322,
+        tpl_323: 323,
+      };
+
+      function updateTemplateId(module) {
+        const hidden = document.getElementById("template_ids");
+        const visible = document.getElementById("template_id");
+
+        if (!hidden || !visible) return;
+
+        if (!module.startsWith("group_")) {
+          const id = TEMPLATE_IDS[module];
+          hidden.value = JSON.stringify([id]);
+          visible.value = id || "";
+          return;
+        }
+
+        const groupName = module.replace("group_", "");
+
+        fetch("/groups")
+          .then((r) => r.json())
+          .then((all) => {
+            const groups = all.groups || {};
+            const templates = groups[groupName] || [];
+            const ids = templates.map((t) => TEMPLATE_IDS[t]);
+            hidden.value = JSON.stringify(ids);
+            visible.value = ids.length > 0 ? ids[0] : "";
+          });
+      }
+    </script>
+
+    <!-- Status (pastilles à gauche) -->
+    <script>
+      function updateStatus() {
+        fetch("/status")
+          .then((response) => response.json())
+          .then((data) => {
+            document.querySelector("#status-terraform .dot").className =
+              "dot " + (data.terraform ? "green" : "red");
+            document.querySelector("#status-ansible .dot").className =
+              "dot " + (data.ansible ? "green" : "red");
+            document.querySelector("#status-jenkins .dot").className =
+              "dot " + (data.jenkins ? "green" : "red");
+            document.querySelector("#status-graylog .dot").className =
+              "dot " + (data.graylog ? "green" : "red");
+            document.querySelector("#status-docker .dot").className =
+              "dot " + (data.docker ? "green" : "red");
+            document.querySelector("#status-pve1 .dot").className =
+              "dot " + (data.pve1 ? "green" : "red");
+            document.querySelector("#status-pve2 .dot").className =
+              "dot " + (data.pve2 ? "green" : "red");
+            document.querySelector("#status-pve3 .dot").className =
+              "dot " + (data.pve3 ? "green" : "red");
+          })
+          .catch(() => {
+            document
+              .querySelectorAll(".dot")
+              .forEach((dot) => (dot.className = "dot red"));
+          });
+      }
+    </script>
+
+    <!-- Monitoring Proxmox -->
+    <script>
+      function updateMonitor(node) {
+        fetch("/monitor/" + node)
+          .then((r) => r.json())
+          .then((data) => {
+            const el = document.getElementById("mon-" + node);
+            if (!el) return;
+
+            if (!data.online) {
+              el.innerHTML =
+                node.toUpperCase() +
+                ' : <span style="color:red;">OFFLINE</span>';
+              return;
+            }
+
+            let cpu = data.cpu !== null ? data.cpu + "%" : "N/A";
+            let ram = data.ram !== null ? data.ram + "%" : "N/A";
+            let disk = data.disk !== null ? data.disk + "%" : "N/A";
+            let vm = data.vm !== null ? data.vm : "N/A";
+            let ping = data.ping !== null ? data.ping + " ms" : "N/A";
+
+            el.innerHTML = `
+              ${node.toUpperCase()} :
+              <span style="color:#22c55e;">ONLINE</span><br>
+              Ping : ${ping}<br>
+              CPU : ${cpu}<br>
+              RAM : ${ram}<br>
+              DISK : ${disk}<br>
+              VM : ${vm}
+            `;
+          })
+          .catch((err) => {
+            console.error("Erreur monitor:", err);
+          });
+      }
+
+      function refreshAllMonitors() {
+        updateMonitor("pve01");
+        updateMonitor("pve02");
+        updateMonitor("pve03");
+      }
+    </script>
+
+    <!-- Calendrier + Horloge -->
+    <script>
+      function buildCalendar() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+
+        const calMonth = document.getElementById("cal-month");
+        const calDate = document.getElementById("cal-date");
+        const calBody = document.getElementById("cal-body");
+
+        if (!calMonth || !calDate || !calBody) return;
+
+        const monthName = now.toLocaleDateString("fr-FR", { month: "long" });
+        calMonth.textContent =
+          monthName.charAt(0).toUpperCase() + monthName.slice(1) + " " + year;
+
+        calDate.textContent = now.toLocaleDateString("fr-FR", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        });
+
+        calBody.innerHTML = "";
+
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const today = now.getDate();
+
+        let startDay = firstDay.getDay();
+        startDay = (startDay + 6) % 7; // Lundi = 0
+
+        let currentDay = 1;
+        const totalDays = lastDay.getDate();
+
+        for (let week = 0; week < 6; week++) {
+          const tr = document.createElement("tr");
+
+          for (let d = 0; d < 7; d++) {
+            const td = document.createElement("td");
+
+            if (week === 0 && d < startDay) {
+              td.className = "cal-day-empty";
+              td.innerHTML = "&nbsp;";
+            } else if (currentDay > totalDays) {
+              td.className = "cal-day-empty";
+              td.innerHTML = "&nbsp;";
+            } else {
+              td.className = "cal-day";
+              td.textContent = currentDay;
+
+              if (currentDay === today) {
+                td.classList.add("cal-today");
+              }
+
+              currentDay++;
+            }
+
+            tr.appendChild(td);
+          }
+
+          calBody.appendChild(tr);
+
+          if (currentDay > totalDays) break;
+        }
+      }
+
+      function updateClock() {
+        const el = document.getElementById("cal-time");
+        if (!el) return;
+        const now = new Date();
+        el.textContent = now.toLocaleTimeString("fr-FR", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        });
+      }
+    </script>
+
+    <!-- Logs Proxmox -->
+    <script>
+      let currentNode = null;
+
+      function loadLogs(node) {
+        currentNode = node;
+        updateLogs();
+      }
+
+      function updateLogs() {
+        if (!currentNode) return;
+
+        fetch("/logs/" + currentNode)
+          .then((r) => r.text())
+          .then((t) => {
+            const box = document.getElementById("log-output");
+            if (box) {
+              box.textContent = t;
+              const container = box.parentElement;
+              container.scrollTop = container.scrollHeight;
+            }
+          })
+          .catch((err) => {
+            console.error("Erreur logs:", err);
+          });
+      }
+    </script>
+
+    <!-- VM List & Actions -->
+    <script>
+      function loadVMs() {
+        const select = document.getElementById("vm-node-selector");
+        if (!select) return;
+        const node = select.value;
+
+        fetch("/vms/" + node)
+          .then((r) => r.json())
+          .then((vms) => {
+            if (vms.error) {
+              document.getElementById("vm-list").innerHTML =
+                "<em>" + vms.error + "</em>";
+              return;
+            }
+
+            let html =
+              "<table><tr><th>ID</th><th>Nom</th><th>État</th><th>Actions</th></tr>";
+
+            vms.forEach((vm) => {
+              const isRunning = vm.status === "running";
+              html += `
+                <tr>
+                  <td>${vm.vmid}</td>
+                  <td>${vm.name || vm.vmid}</td>
+                  <td>${vm.status}</td>
+                  <td>
+                      ${isRunning ? `
+                        <button class="btn-vm btn-vm-stop"
+                                onclick="vmAction('${node}', ${vm.vmid}, 'stop')">Stop</button>
+                        <button class="btn-vm btn-vm-reset"
+                                onclick="vmAction('${node}', ${vm.vmid}, 'reset')">Reset</button>
+                  ` : `
+                        <button class="btn-vm btn-vm-start"
+                                onclick="vmAction('${node}', ${vm.vmid}, 'start')">Start</button>
+                  `}
+                        <button class="btn-vm"
+                                style="background:#b00000;color:white;"
+                                onclick="vm_delete('${node}', ${vm.vmid})">Supprimer</button>
+
+                        <button class="btn-vm"
+                                style="background:#2563eb;color:white;"
+                                onclick="migrateVM('${node}', ${vm.vmid})">
+                            Migrer
+                        </button>
+                  </td>
+                </tr>
+              `;
+            });
+
+            html += "</table>";
+            document.getElementById("vm-list").innerHTML = html;
+          })
+          .catch((err) => {
+            console.error("Erreur VMs:", err);
+            document.getElementById("vm-list").innerHTML =
+              "<em>Impossible de charger les VMs.</em>";
+          });
+      }
+
+      function vmAction(node, vmid, action) {
+        fetch(`/vm/${node}/${vmid}/${action}`, { method: "POST" })
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.success) {
+              alert("Action effectuée : " + action);
+              loadVMs();
+            } else {
+              alert("Erreur : " + (data.error || "action impossible"));
+            }
+          })
+          .catch((err) => {
+            console.error("Erreur action VM:", err);
+            alert("Erreur côté client");
+          });
+      }
+
+      function vm_delete(node, vmid) {
+        if (!confirm("Confirmer la suppression de la VM " + vmid + " ?")) {
+          return;
+        }
+
+        fetch(`/vm/${node}/${vmid}/delete`, {
+          method: "POST",
+        })
+          .then((r) => r.json())
+          .then((res) => {
+            if (res.success) {
+              alert("VM supprimée !");
+              loadVMs();
+            } else {
+              alert("Erreur : " + res.error);
+            }
+          })
+          .catch((err) => {
+            alert("Erreur côté client : " + err);
+          });
+      }
+    </script>
+
+    <!-- Ansible -->
+    <script>
+      function runPlay(play) {
+        document.getElementById("ansible-output").textContent =
+          "⏳ Exécution en cours…";
+
+        fetch("/ansible/run/" + play, { method: "POST" })
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.success) {
+              document.getElementById("ansible-output").textContent =
+                data.output;
+            } else {
+              document.getElementById("ansible-output").textContent =
+                "❌ Erreur :\n" + (data.output || data.error);
+            }
+          })
+          .catch((err) => {
+            document.getElementById("ansible-output").textContent =
+              "❌ Erreur JS : " + err;
+          });
+      }
+    </script>
+
+    <!-- Groupes -->
+    <script>
+      function loadGroups() {
+        fetch("/groups")
+          .then((r) => r.json())
+          .then((data) => {
+            const groups = data.groups || {};
+            const names = Object.keys(groups);
+            const listDiv = document.getElementById("groups-list");
+            if (!listDiv) return;
+
+            let html = "";
+            if (names.length === 0) {
+              html = "<em>Aucun groupe défini pour le moment.</em>";
+            } else {
+              html = "<ul>";
+              names.forEach((n) => {
+                html += "<li>" + n + "</li>";
+              });
+              html += "</ul>";
+              html +=
+                "<p style='font-size:0.8rem; color:#6b7280;'>" +
+                'Pour déployer un groupe, sélectionnez-le dans "Template à déployer" puis lancez Terraform.' +
+                "</p>";
+            }
+            listDiv.innerHTML = html;
+
+            const tplSelect = document.querySelector('select[name="module"]');
+            if (tplSelect) {
+              // on retire d’abord les anciens groupes
+              Array.from(tplSelect.options).forEach((opt) => {
+                if (opt.value && opt.value.toString().startsWith("group_")) {
+                  opt.remove();
+                }
+              });
+
+              if (names.length > 0) {
+                let hasSep = false;
+                Array.from(tplSelect.options).forEach((opt) => {
+                  if (
+                    opt.disabled &&
+                    opt.textContent.indexOf("Groupes") !== -1
+                  ) {
+                    hasSep = true;
+                  }
+                });
+                if (!hasSep) {
+                  const sep = document.createElement("option");
+                  sep.disabled = true;
+                  sep.textContent =
+                    "────────── Groupes de déploiement ──────────";
+                  tplSelect.appendChild(sep);
+                }
+
+                names.forEach((n) => {
+                  const opt = document.createElement("option");
+                  opt.value = "group_" + n;
+                  opt.textContent = "Groupe : " + n;
+                  tplSelect.appendChild(opt);
+                });
+              }
+            }
+          })
+          .catch((err) => {
+            console.error("Erreur loadGroups:", err);
+          });
+      }
+
+      function createGroup() {
+        const nameInput = document.getElementById("new-group-name");
+        const select = document.getElementById("new-group-modules");
+
+        if (!nameInput || !select) return;
+
+        const name = nameInput.value.trim();
+        const modules = Array.from(select.selectedOptions).map((o) => o.value);
+
+        if (!name) {
+          alert("Merci de donner un nom au groupe.");
+          return;
+        }
+        if (modules.length === 0) {
+          alert("Sélectionne au moins un template.");
+          return;
+        }
+
+        fetch("/groups/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, modules }),
+        })
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.success) {
+              alert("Groupe créé : " + name);
+              nameInput.value = "";
+              Array.from(select.options).forEach((o) => (o.selected = false));
+              loadGroups();
+            } else {
+              alert("Erreur : " + (data.error || "inconnue"));
+            }
+          })
+          .catch((err) => {
+            console.error("Erreur createGroup:", err);
+            alert("Erreur côté client lors de la création du groupe.");
+          });
+      }
+    </script>
+
+    <!-- Init globale -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const moduleSelect = document.querySelector('select[name="module"]');
+        if (moduleSelect) {
+          updateTemplateId(moduleSelect.value);
+        }
+
+        updateStatus();
+        refreshAllMonitors();
+        setInterval(updateStatus, 5000);
+        setInterval(refreshAllMonitors, 5000);
+
+        buildCalendar();
+        updateClock();
+        setInterval(updateClock, 1000);
+        setInterval(buildCalendar, 60 * 60 * 1000);
+
+        loadLogs("pve01");
+        setInterval(updateLogs, 3000);
+
+        loadVMs();
+        loadGroups();
+      });
+    </script>
+    <script>
+      function migrateVM(node, vmid) {
+        const target = prompt(
+        "Vers quel nœud migrer la VM ?\n(pve01, pve02 ou pve03)"
+        );
+
+        if (!target) return;
+
+        fetch(`/vm/${node}/${vmid}/migrate`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ target: target })
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message || "Migration terminée");
+            location.reload();
+        })
+        .catch(err => {
+            alert("Erreur migration");
+            console.error(err);
+        });
+      }
+    </script>
+
+  </body>
+</html>
