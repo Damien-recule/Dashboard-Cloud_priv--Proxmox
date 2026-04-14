@@ -4,7 +4,9 @@
 """
 NebTech Cloud Dashboard
 -----------------------
-
+Auteur : RECULE Damien
+Date : 01/02/2026
+-----------------------
 Fonctionnalités :
 - Authentification + 2FA
 - Monitoring Proxmox (3 nœuds)
@@ -52,29 +54,29 @@ app.secret_key = secrets.token_hex(32)
 # CONFIG PROXMOX
 # -------------------------------------------------------------------
 PVE_NODES = {
-    "pve01": {"ip": "IP_NOEUD_001", "name": "pve01"},
-    "pve1": {"ip": "IP_NOEUD_001"name": "pve01"},
+    "pve01": {"ip": "<IP_NOEUDS001>", "name": "pve01"},
+    "pve1": {"ip": "<IP_NOEUDS001>", "name": "pve01"},
 
-    "pve02": {"ip": "IP_NOEUD_002", "name": "pve02"},
-    "pve2": {"ip": "IP_NOEUD_002", "name": "pve02"},
+    "pve02": {"ip": "<IP_NOEUDS002>", "name": "pve02"},
+    "pve2": {"ip": "<IP_NOEUDS002>", "name": "pve02"},
 
-    "pve03": {"ip": "IP_NOEUD_003", "name": "pve03"},
-    "pve3": {"ip": "IP_NOEUD_003", "name": "pve03"},
+    "pve03": {"ip": "<IP_NOEUDS003>", "name": "pve03"},
+    "pve3": {"ip": "<IP_NOEUDS003>", "name": "pve03"},
 }
 
 PVE_HOSTS = {
-    "pve01": "IP_NOEUD_001",
-    "pve1": "IP_NOEUD_001",
+    "pve01": "<IP_NOEUDS001>",
+    "pve1": "<IP_NOEUDS001>",
 
-    "pve02": "IP_NOEUD_002",
-    "pve2": "IP_NOEUD_002",
+    "pve02": "<IP_NOEUDS002>",
+    "pve2": "<IP_NOEUDS002>",
 
-    "pve03": "IP_NOEUD_003",
-    "pve3": "IP_NOEUD_003",
+    "pve03": "<IP_NOEUDS003>",
+    "pve3": "<IP_NOEUDS003>",
 }
 
-PVE_TOKEN_ID = "root@pam!<nom_du_token>"
-PVE_SECRET = "<PVE_TOKEN_ID>"
+PVE_TOKEN_ID = "USER_PROXMOX"
+PVE_SECRET = "TOKEN_PROXMOX"
 
 HEADERS_PVE = {
     "Authorization": f"PVEAPIToken={PVE_TOKEN_ID}={PVE_SECRET}"
@@ -83,6 +85,7 @@ HEADERS_PVE = {
 # -------------------------------------------------------------------
 # TEMPLATES Proxmox (ID → description)
 # -------------------------------------------------------------------
+# Exemple de templates metiers
 TEMPLATES_INFO = {
     "tpl_300": {"template_id": 300, "name": "Debian 12 Base"},
     "tpl_301": {"template_id": 301, "name": "Bastion SSH"},
@@ -314,6 +317,49 @@ def api_vm_delete(node, vmid):
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
+## migration vms multi-noeuds
+
+@app.route("/vm/<node>/<vmid>/migrate", methods=["POST"])
+def api_vm_migrate(node, vmid):
+    if node not in PVE_NODES:
+        return jsonify({"success": False, "error": "node invalide"}), 400
+
+    data = request.get_json()
+    target = data.get("target")
+
+    if not target or target not in PVE_NODES:
+        return jsonify({"success": False, "error": "target invalide"}), 400
+
+    ip = PVE_NODES[node]["ip"]
+    source_node = PVE_NODES[node]["name"]
+
+    try:
+        r = requests.post(
+            f"https://{ip}:8006/api2/json/nodes/{source_node}/qemu/{vmid}/migrate",
+            headers=HEADERS_PVE,
+            verify=False,
+            timeout=10,
+            data={
+                "target": target,
+                "online": 1   # ✅ migration LIVE (car storage partagé)
+            }
+        )
+
+        print("MIGRATION RESPONSE:", r.text)  # debug
+
+        r.raise_for_status()
+
+        return jsonify({
+            "success": True,
+            "message": f"Migration vers {target} lancée"
+        })
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        })
+
 # -------------------------------------------------------------------
 # LOGS PROXMOX
 # -------------------------------------------------------------------
@@ -367,35 +413,35 @@ def small_ping(host):
 
 
 def check_jenkins():
-    return small_ping("IP_JENKINS")
+    return small_ping("<IP>")
 
 
 def check_ansible_host():
-    return small_ping("IP_ANSIBLE")
+    return small_ping("<IP>")
 
 
 def check_graylog():
-    return small_ping("IP_GRAYLOG")
+    return small_ping("<IP>")
 
 
 def check_docker():
-    return small_ping("IP_DOCKER")
+    return small_ping("<IP>")
 
 
 def check_terraform_host():
-    return small_ping("IP_TERRAFORM")
+    return small_ping("<IP>")
 
 
 def check_pve1():
-    return small_ping("IP_NOEUD_001")
+    return small_ping("<IP>")
 
 
 def check_pve2():
-    return small_ping("IP_NOEUD_002")
+    return small_ping("<IP>")
 
 
 def check_pve3():
-    return small_ping("IP_NOEUD_003")
+    return small_ping("<IP>")
 
 
 @app.route("/status")
@@ -437,7 +483,7 @@ def ansible_run_play(play):
         result = subprocess.check_output(
             [
                 "ssh",
-                "root@<IP_ANSIBLE>",
+                "root@192.168.1.134",
                 f"ansible-playbook {playbook_path} -i /etc/ansible/inventory.ini",
             ],
             stderr=subprocess.STDOUT,
@@ -528,7 +574,7 @@ def ansible_deploy_run():
 
     # 1) Écriture de l’inventaire sur le serveur Ansible
     subprocess.run(
-        ["ssh", "root@<IP_ANSIBLE>", ssh_inventory],
+        ["ssh", "root@192.168.1.134", ssh_inventory],
         text=True
     )
 
@@ -549,7 +595,7 @@ def ansible_deploy_run():
 
     try:
         result = subprocess.check_output(
-            ["ssh", "root@<IP_ANSIBLE>", cmd],
+            ["ssh", "root@192.168.1.134", cmd],
             stderr=subprocess.STDOUT,
             text=True
         )
@@ -564,8 +610,8 @@ def ansible_deploy_run():
 # -------------------------------------------------------------------
 # AUTHENTIFICATION (LOGIN + 2FA)
 # -------------------------------------------------------------------
-ADMIN_USERNAME = "<ADMIN_USERNAME>"
-ADMIN_PASSWORD = "<ADMIN_PASSWORD>"
+ADMIN_USERNAME = "USER_DASHBOARD"
+ADMIN_PASSWORD = "MDP_DASHBOARD"
 TOTP_SECRET = pyotp.random_base32()
 
 
@@ -671,10 +717,10 @@ terraform {
 }
 
 provider "proxmox" {
-  endpoint = "https://<NOEUD_001>:8006/"
+  endpoint = "https://IP_PROXMOX_NOEUD001/"
   insecure = true
-  username = "root@pam"
-  password = "<PASSWORD>"
+  username = "USER"
+  password = "PASSWORD"
 }
 
 resource "proxmox_virtual_environment_vm" "vm" {
@@ -772,10 +818,10 @@ terraform {
 }
 
 provider "proxmox" {
-  endpoint = "https://<IP_NOEUD_001>:8006/"
+  endpoint = "https://IP_PROXMOX_NOEUD001/"
   insecure = true
-  username = "root@pam"
-  password = "<PASSWORD>"
+  username = "USER"
+  password = "PASWWORD"
 }
 """
 
