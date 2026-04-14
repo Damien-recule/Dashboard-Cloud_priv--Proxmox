@@ -451,7 +451,7 @@
         <div class="grid-1">
           <div>
             <label>Template à déployer</label>
-            <select name="module">
+            <select name="module" onchange="updateTemplateId(this.value)">
   {% for key, tpl in TEMPLATES_INFO.items() %}
   <option value="{{ key }}">{{ tpl.name }} (ID {{ tpl.template_id }})</option>
   {% endfor %}
@@ -487,13 +487,20 @@
 
           <div>
             <label>ID du template</label>
-            <input
-              type="text"
-              name="template_id"
-              id="template_id"
-              value="{{ form.template_id }}"
-              required
-            />
+             <input
+               type="hidden"
+               name="template_id"
+               id="template_id"
+               value="{{ form.template_id }}"
+             />
+
+             <!-- affichage visuel -->
+             <input
+               type="text"
+               id="template_display"
+               value="{{ form.template_id }}"
+               disabled
+             />
             <input type="hidden" name="template_ids" id="template_ids" />
           </div>
 
@@ -566,7 +573,7 @@
           <button
             type="button"
             class="external-btn"
-            onclick="window.open('http://192.168.1.62:8080','_blank')"
+            onclick="window.open('http://<IP_JENKINS>:8080','_blank')"
           >
             Accéder à Jenkins
           </button>
@@ -574,7 +581,7 @@
           <button
             type="button"
             class="external-btn"
-            onclick="window.open('https://192.168.1.134:4200','_blank')"
+            onclick="window.open('https://<IP_ANSIBLE>:4200','_blank')"
           >
             Terminal Ansible (SSH)
           </button>
@@ -648,7 +655,7 @@
 
         <!-- BOUTON GRAYLOG -->
         <button class="card-btn"
-                onclick="window.open('http://192.168.1.172:9000','_blank')">
+                onclick="window.open('http://<IP_GRAYLOG>:9000','_blank')">
             Accéder à Graylog
         </button>
 
@@ -793,21 +800,21 @@
       <button
         class="external-btn"
         style="width:100%; margin-bottom:8px;"
-        onclick="window.open('https://192.168.1.193:8006','_blank')"
+        onclick="window.open('https://<IP_NOEUD-001>:8006','_blank')"
       >
         🌐 PVE01
       </button>
       <button
         class="external-btn"
         style="width:100%; margin-bottom:8px;"
-        onclick="window.open('https://192.168.1.194:8006','_blank')"
+        onclick="window.open('https://<IP_NOEUD-002>:8006','_blank')"
       >
         🌐 PVE02
       </button>
       <button
         class="external-btn"
         style="width:100%;"
-        onclick="window.open('https://192.168.1.195:8006','_blank')"
+        onclick="window.open('https://<IP_NOEUD-003>:8006','_blank')"
       >
         🌐 PVE03
       </button>
@@ -847,30 +854,38 @@
       };
 
       function updateTemplateId(module) {
-        const hidden = document.getElementById("template_ids");
-        const visible = document.getElementById("template_id");
+  const hidden = document.getElementById("template_id");
+  const display = document.getElementById("template_display");
 
-        if (!hidden || !visible) return;
+  if (!hidden || !display) return;
 
-        if (!module.startsWith("group_")) {
-          const id = TEMPLATE_IDS[module];
-          hidden.value = JSON.stringify([id]);
-          visible.value = id || "";
-          return;
-        }
+  // cas template simple
+  if (!module.startsWith("group_")) {
+    const id = TEMPLATE_IDS[module];
 
-        const groupName = module.replace("group_", "");
+    hidden.value = id || "";
+    display.value = id || "";
 
-        fetch("/groups")
-          .then((r) => r.json())
-          .then((all) => {
-            const groups = all.groups || {};
-            const templates = groups[groupName] || [];
-            const ids = templates.map((t) => TEMPLATE_IDS[t]);
-            hidden.value = JSON.stringify(ids);
-            visible.value = ids.length > 0 ? ids[0] : "";
-          });
-      }
+    console.log("Template choisi :", module, "ID:", id);
+    return;
+  }
+
+  // cas groupe
+  const groupName = module.replace("group_", "");
+
+  fetch("/groups")
+    .then((r) => r.json())
+    .then((all) => {
+      const groups = all.groups || {};
+      const templates = groups[groupName] || [];
+      const ids = templates.map((t) => TEMPLATE_IDS[t]);
+
+      hidden.value = ids.length > 0 ? ids[0] : "";
+      display.value = ids.length > 0 ? ids[0] : "";
+
+      console.log("Groupe :", groupName, "IDs:", ids);
+    });
+}
     </script>
 
     <!-- Status (pastilles à gauche) -->
