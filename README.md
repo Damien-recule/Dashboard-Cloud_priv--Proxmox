@@ -77,6 +77,116 @@ Ce projet a pour but de démontrer :
 
 * des compétences en **DevOps**
 * la maîtrise des outils **cloud & automatisation**
+
+------------------------------------------------------
+
+Arborescence du projet Dashboard NebTech
+Structure globale du projet
+
+/opt/nebtech-dashboard/
+│
+├── app.py                  # Application Flask principale
+├── requirements.txt        # Dépendances Python
+├── config/
+│   ├── settings.py         # Variables globales (IP, tokens, etc.)
+│   └── secrets.env         # Variables sensibles
+├── templates/              # Templates HTML (Jinja2)
+│   ├── index.html
+│   ├── login.html
+│   ├── 2fa.html
+│   ├── ansible_deploy.html
+│   └── no_cert.html
+│
+├── static/                 # Fichiers statiques
+│   ├── css/
+│   │   └── style.css
+│   ├── js/
+│   │   └── app.js
+│   ├── images/
+│   │   └── logo.png
+│   └── background.jpg
+│
+├── modules/                # Logique métier
+│   ├── proxmox.py
+│   ├── ansible.py
+│   ├── terraform.py
+│   └── monitoring.py
+│
+├── logs/                   # Logs applicatifs
+│   └── dashboard.log
+│
+
+Partie système (serveur Debian)
+Intégration DevOps
+Terraform
+/etc/terraform/
+│
+└── cloud-project/
+    ├── modules/
+    │   └── vm_generic/
+    └── environments/
+        └── production/
+            └── groups.json
+
+Ansible
+/etc/ansible/
+│
+├── playbooks/
+│   ├── bootstrap.yml
+│   ├── nginx.yml
+│   ├── zabbix.yml
+│   └── glpi.yml
+ |     |── ……
+│
+└── inventory.ini
+
+
+Infrastructure complète Graylog
+/infra/
+│
+├── proxmox-cluster/
+│   ├── pve01
+│   ├── pve02
+│   └── pve03
+│
+├── storage/
+│   └── ceph (OSD + MON + MGR)
+│
+├── vm-services/
+│   ├── terraform-vm (Debian)
+│   ├── ansible-vm (Debian)
+│   ├── jenkins-vm (Debian)
+│   ├── graylog-vm (Debian)
+│   ├── dashboard-vm (Debian)
+│   └── pbs-vm (backup)
+
+Serveur Jenkins
+Arborescence
+/var/lib/jenkins/
+│
+├── jobs/
+│   └── infra-pipeline/
+│       └── config.xml
+│
+├── workspace/
+│   └── infra-pipeline/
+│       └── Jenkinsfile
+│
+├── plugins/
+├── secrets/
+└── logs/
+
+Flux d’accès au dashboard.
+Utilisateur
+   ↓
+https://dashboard.novatechsolutions.fr
+   ↓
+(mTLS + HTTPS)
+   ↓
+Flask (app.py)
+   ↓
+Proxmox / Ansible / Terraform
+
 * la capacité à concevoir une **plateforme complète de gestion d’infrastructure**
 
 ---
