@@ -81,8 +81,9 @@ Ce projet a pour but de démontrer :
 ------------------------------------------------------
 
 Arborescence du projet Dashboard NebTech
-Structure globale du projet
-'''
+## 🏗️ Structure du projet
+
+```bash
 /opt/nebtech-dashboard/
 │
 ├── app.py                  # Application Flask principale
@@ -103,7 +104,7 @@ Structure globale du projet
 │   ├── js/
 │   │   └── app.js
 │   ├── images/
-│   │   └── logo.png
+│   │   │── logo.png
 │   └── background.jpg
 │
 ├── modules/                # Logique métier
@@ -114,11 +115,14 @@ Structure globale du projet
 │
 ├── logs/                   # Logs applicatifs
 │   └── dashboard.log
-│
+```
 
-Partie système (serveur Debian)
-Intégration DevOps
-Terraform
+---
+
+## ⚙️ Partie système (serveur Debian)
+
+### Terraform
+```bash
 /etc/terraform/
 │
 └── cloud-project/
@@ -127,8 +131,10 @@ Terraform
     └── environments/
         └── production/
             └── groups.json
+```
 
-Ansible
+### Ansible
+```bash
 /etc/ansible/
 │
 ├── playbooks/
@@ -136,12 +142,16 @@ Ansible
 │   ├── nginx.yml
 │   ├── zabbix.yml
 │   └── glpi.yml
- |     |── ……
+│       └── ...
 │
 └── inventory.ini
+```
 
+---
 
-Infrastructure complète Graylog
+## 🖥️ Infrastructure (Graylog / Proxmox)
+
+```bash
 /infra/
 │
 ├── proxmox-cluster/
@@ -159,9 +169,13 @@ Infrastructure complète Graylog
 │   ├── graylog-vm (Debian)
 │   ├── dashboard-vm (Debian)
 │   └── pbs-vm (backup)
+```
 
-Serveur Jenkins
-Arborescence
+---
+
+## 🤖 Serveur Jenkins
+
+```bash
 /var/lib/jenkins/
 │
 ├── jobs/
@@ -175,7 +189,8 @@ Arborescence
 ├── plugins/
 ├── secrets/
 └── logs/
-'''
+```
+
 
 Flux d’accès au dashboard.
 Utilisateur
