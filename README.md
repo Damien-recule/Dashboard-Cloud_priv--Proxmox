@@ -82,7 +82,7 @@ Ce projet a pour but de démontrer :
 
 Arborescence du projet Dashboard NebTech
 Structure globale du projet
-
+'''
 /opt/nebtech-dashboard/
 │
 ├── app.py                  # Application Flask principale
@@ -175,6 +175,7 @@ Arborescence
 ├── plugins/
 ├── secrets/
 └── logs/
+'''
 
 Flux d’accès au dashboard.
 Utilisateur
