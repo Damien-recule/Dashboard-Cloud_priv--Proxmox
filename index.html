@@ -2,7 +2,7 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <title>NovaSolutions - Déploiement</title>
+    <title>Proxmox - Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
       /* ----------------------------- */
@@ -407,31 +407,31 @@
       <div id="status-graylog">
         Graylog --: <span class="dot gray"></span>
       </div>
-      <div id="status-docker">
-        Docker ---: <span class="dot gray"></span>
+      <div id="status-kubernetes">
+        kubernetes : <span class="dot gray"></span>
       </div>
-      <div id="status-pve1">
-        PVE01 --: <span class="dot gray"></span>
+      <div id="status-pve-001">
+        PVE-001 --: <span class="dot gray"></span>
       </div>
-      <div id="status-pve2">
-        PVE02 --: <span class="dot gray"></span>
+      <div id="status-pve-002">
+        PVE-002 --: <span class="dot gray"></span>
       </div>
-      <div id="status-pve3">
-        PVE03 --: <span class="dot gray"></span>
+      <div id="status-pve-003">
+        PVE-003 --: <span class="dot gray"></span>
       </div>
 
       <div id="monitor-panel">
         <div class="title">Monitoring Proxmox</div>
-        <div id="mon-pve01" class="line">PVE01 : ...</div>
-        <div id="mon-pve02" class="line">PVE02 : ...</div>
-        <div id="mon-pve03" class="line">PVE03 : ...</div>
+        <div id="mon-pve-001" class="line">PVE-001 : ...</div>
+        <div id="mon-pve-002" class="line">PVE-002 : ...</div>
+        <div id="mon-pve-003" class="line">PVE-003 : ...</div>
       </div>
     </div>
 
     <!-- LOGO -->
     <div style="text-align:center; margin-bottom:20px; margin-top:10px;">
       <img
-        src="/static/logo.png"
+        src="/static/logo.jpg"
         alt="NebTech Logo"
         style="width:180px; opacity:0.95"
       />
@@ -439,10 +439,10 @@
 
     <!-- CARD PRINCIPALE -->
     <div class="card">
-      <h1>NovaSolutions - Déploiement</h1>
+      <h1>Proxmox - Dashboard</h1>
       <p class="subtitle">
         <span style="color:#22c55e; font-weight:bold;">
-          Projet de fin d’étude "Mise en place d'un Cloud privé"
+          Proxmox Projet "Cloud privé"
         </span>
         : <strong>RECULE Damien</strong>
       </p>
@@ -526,9 +526,9 @@
 
           <div>
             <label>Datastore</label>
-            <!-- Forcé à vmstore côté backend, mais on l’affiche pour info -->
-            <input type="text" value="vmstore" disabled />
-            <input type="hidden" name="datastore" value="vmstore" />
+            <!-- Forcé à DEPLOIEMENT côté backend, mais on l’affiche pour info -->
+            <input type="text" value="Shared-NFS" disabled />
+            <input type="hidden" name="datastore" value="Shared-NFS" />
           </div>
 
           <div>
@@ -540,22 +540,22 @@
             <label>Nœud Proxmox</label>
             <select name="node" id="node" required>
               <option
-                value="pve01"
-                {% if form.node == "pve01" %}selected{% endif %}
+                value="pve-001"
+                {% if form.node == "pve-001" %}selected{% endif %}
               >
-                pve01
+                pve-001
               </option>
               <option
-                value="pve02"
-                {% if form.node == "pve02" %}selected{% endif %}
+                value="pve-002"
+                {% if form.node == "pve-002" %}selected{% endif %}
               >
-                pve02
+                pve-002
               </option>
               <option
-                value="pve03"
-                {% if form.node == "pve03" %}selected{% endif %}
+                value="pve-003"
+                {% if form.node == "pve-003" %}selected{% endif %}
               >
-                pve03
+                pve-003
               </option>
             </select>
           </div>
@@ -573,7 +573,7 @@
           <button
             type="button"
             class="external-btn"
-            onclick="window.open('http://<IP_JENKINS>:8080','_blank')"
+            onclick="window.open('http://192.168.1.132:8080','_blank')"
           >
             Accéder à Jenkins
           </button>
@@ -581,64 +581,70 @@
           <button
             type="button"
             class="external-btn"
-            onclick="window.open('https://<IP_ANSIBLE>:4200','_blank')"
+            onclick="window.open('https://192.168.1.4:9090','_blank')"
           >
-            Terminal Ansible (SSH)
-          </button>
+            Kubernetes Control-Plane (SSH)
+          <!-- </button>
+          <button
+            type="button"
+            class="external-btn"
+            onclick="window.open('ssh root@192.168.1.4','_blank')"
+          > -->
         </div>
       </form>
 
-      {% if output %}
+      <!-- {% if output %}
       <div class="output-box">
         {{ output }}
       </div>
-      {% endif %}
+      {% endif %} -->
     </div>
 
     <!-- LISTE DES VM -->
     <div id="vm-card">
       <h2 style="text-align: center">Machines Virtuelles Proxmox</h2>
       <select id="vm-node-selector" onchange="loadVMs()">
-        <option value="pve01">PVE01</option>
-        <option value="pve02">PVE02</option>
-        <option value="pve03">PVE03</option>
+        <option value="pve-001">PVE-001</option>
+        <option value="pve-002">PVE-002</option>
+        <option value="pve-003">PVE-003</option>
       </select>
       <div id="vm-list" style="margin-top: 10px;">Chargement...</div>
+    </div> <!-- repert -->
+
     </div>
 
-    <!-- ANSIBLE PANEL -->
-    <div class="card" style="max-width:900px; margin:20px auto;">
-      <h2 style="text-align:center;">Ansible Automation</h2>
-      <div style="display:flex; gap:10px; margin-bottom:10px;">
+  </div>
+</div>
+      <!-- <div style="display:flex; gap:10px; margin-bottom:10px;">
         <button class="external-btn" onclick="runPlay('ping')">
           Test de connectivité (ping.yml)
         </button>
-        <button class="external-btn" onclick="runPlay('maj')">
-          Mise à jour Linux (maj.yml)
+        <button class="external-btn" onclick="runPlay('facts')">
+          Infos Proxmox (facts.yml)
         </button>
       </div>
-      <pre
-        id="ansible-output"
-        style="
-          background:#111827;
-          color:#d1fae5;
-          padding:12px;
-          border-radius:10px;
-          height:220px;
-          overflow:auto;
-          white-space: pre-wrap;
-          font-size:0.85rem;
-        "
-      >En attente…</pre>
+      <pre id="ansible-output"
+     style="
+        background:#111827;
+        color:#d1fae5;
+        padding:12px;
+        border-radius:10px;
+        height:20px;
+        overflow:auto;
+        white-space:pre-wrap;
+        font-size:0.85rem;
+     ">
+      En attente…
+      </pre> -->
     </div>
 
     <!-- LOGS PANEL -->
     <div id="logs-panel">
       <h3>Logs Proxmox</h3>
       <div class="log-buttons">
-        <button onclick="loadLogs('pve01')" class="external-btn">PVE01</button>
-        <button onclick="loadLogs('pve02')" class="external-btn">PVE02</button>
-        <button onclick="loadLogs('pve03')" class="external-btn">PVE03</button>
+        <button onclick="loadLogs('pve-001')" class="external-btn">PVE-001</button>
+        <button onclick="loadLogs('pve-002')" class="external-btn">PVE-002</button>
+        <button onclick="loadLogs('pve-003')" class="external-btn">PVE-003</button>
       </div>
       <div class="log-box">
         <pre id="log-output" class="log-content"></pre>
@@ -655,7 +661,7 @@
 
         <!-- BOUTON GRAYLOG -->
         <button class="card-btn"
-                onclick="window.open('http://<IP_GRAYLOG>:9000','_blank')">
+                onclick="window.open('http://192.168.1.48:9000','_blank')">
             Accéder à Graylog
         </button>
 
@@ -663,6 +669,36 @@
         <button class="card-btn highlighted"
                 onclick="window.location.href='/ansible/deploy'">
             Déploiement Ansible
+        </button>
+        <!-- BOUTON PC PCYBOX Orbis -->
+        <button class="card-btn"
+                onclick="window.open('http://192.168.1.189:8000','_blank')">
+            PCYBOX Orbis
+        </button>
+        <!-- BOUTON GLPI -->
+        <button class="card-btn"
+                onclick="window.open('http://192.168.1.12','_blank')">
+            GLPI Management
+        </button>
+        <!-- BOUTON CLI VMs -->
+        <button class="card-btn cli-btn"
+                onclick="openCliModal()">
+            Accès CLI
+        </button>
+        <!-- BOUTON Wazuh -->
+        <button class="card-btn"
+                onclick="window.open('http://192.168.1.48','_blank')">
+            SIEM Wazuh
+        </button>
+        <!-- BOUTON ESXI -->
+        <button class="card-btn"
+                onclick="window.open('http://192.168.1.92','_blank')">
+            ESXI
+        </button>
+        <!-- BOUTON MAIL -->
+        <button class="card-btn"
+                onclick="window.open('http://192.168.1.55','_blank')">
+            Messagerie Interne
         </button>
     </div>
 </div>
@@ -800,23 +836,23 @@
       <button
         class="external-btn"
         style="width:100%; margin-bottom:8px;"
-        onclick="window.open('https://<IP_NOEUD-001>:8006','_blank')"
+        onclick="window.open('https://192.168.1.122:8006','_blank')"
       >
-        🌐 PVE01
+        🌐 PVE-001
       </button>
       <button
         class="external-btn"
         style="width:100%; margin-bottom:8px;"
-        onclick="window.open('https://<IP_NOEUD-002>:8006','_blank')"
+        onclick="window.open('https://192.168.1.187:8006','_blank')"
       >
-        🌐 PVE02
+        🌐 PVE-002
       </button>
       <button
         class="external-btn"
         style="width:100%;"
-        onclick="window.open('https://<IP_NOEUD-003>:8006','_blank')"
+        onclick="window.open('https://192.168.1.68:8006','_blank')"
       >
-        🌐 PVE03
+        🌐 PVE-003
       </button>
     </div>
 
@@ -827,30 +863,10 @@
     <!-- Mapping template → ID Proxmox -->
     <script>
       const TEMPLATE_IDS = {
-        tpl_300: 300,
-        tpl_301: 301,
-        tpl_302: 302,
-        tpl_303: 303,
-        tpl_304: 304,
-        tpl_305: 305,
-        tpl_306: 306,
-        tpl_307: 307,
-        tpl_308: 308,
-        tpl_309: 309,
-        tpl_310: 310,
-        tpl_311: 311,
-        tpl_312: 312,
-        tpl_313: 313,
-        tpl_314: 314,
-        tpl_315: 315,
-        tpl_316: 316,
-        tpl_317: 317,
-        tpl_318: 318,
-        tpl_319: 319,
-        tpl_320: 320,
-        tpl_321: 321,
-        tpl_322: 322,
-        tpl_323: 323,
+        tpl_200: 200,
+        tpl_201: 201,
+        tpl_202: 202,
+        tpl_203: 203,
       };
 
       function updateTemplateId(module) {
@@ -891,32 +907,35 @@
     <!-- Status (pastilles à gauche) -->
     <script>
       function updateStatus() {
-        fetch("/status")
-          .then((response) => response.json())
-          .then((data) => {
-            document.querySelector("#status-terraform .dot").className =
-              "dot " + (data.terraform ? "green" : "red");
-            document.querySelector("#status-ansible .dot").className =
-              "dot " + (data.ansible ? "green" : "red");
-            document.querySelector("#status-jenkins .dot").className =
-              "dot " + (data.jenkins ? "green" : "red");
-            document.querySelector("#status-graylog .dot").className =
-              "dot " + (data.graylog ? "green" : "red");
-            document.querySelector("#status-docker .dot").className =
-              "dot " + (data.docker ? "green" : "red");
-            document.querySelector("#status-pve1 .dot").className =
-              "dot " + (data.pve1 ? "green" : "red");
-            document.querySelector("#status-pve2 .dot").className =
-              "dot " + (data.pve2 ? "green" : "red");
-            document.querySelector("#status-pve3 .dot").className =
-              "dot " + (data.pve3 ? "green" : "red");
-          })
-          .catch(() => {
-            document
-              .querySelectorAll(".dot")
-              .forEach((dot) => (dot.className = "dot red"));
-          });
-      }
+  fetch("/status")
+    .then((response) => response.json())
+    .then((data) => {
+
+      document.querySelector("#status-terraform .dot").className =
+        "dot " + (data.terraform ? "green" : "red");
+
+      document.querySelector("#status-ansible .dot").className =
+        "dot " + (data.ansible ? "green" : "red");
+
+      document.querySelector("#status-jenkins .dot").className =
+        "dot " + (data.jenkins ? "green" : "red");
+
+      document.querySelector("#status-graylog .dot").className =
+        "dot " + (data.graylog ? "green" : "red");
+
+      document.querySelector("#status-kubernetes .dot").className =
+        "dot " + (data.kubernetes ? "green" : "red");
+
+      document.querySelector("#status-pve-001 .dot").className =
+        "dot " + (data["pve-001"] ? "green" : "red");
+
+      document.querySelector("#status-pve-002 .dot").className =
+        "dot " + (data["pve-002"] ? "green" : "red");
+
+      document.querySelector("#status-pve-003 .dot").className =
+        "dot " + (data["pve-003"] ? "green" : "red");
+    });
+}
     </script>
 
     <!-- Monitoring Proxmox -->
@@ -957,9 +976,9 @@
       }
 
       function refreshAllMonitors() {
-        updateMonitor("pve01");
-        updateMonitor("pve02");
-        updateMonitor("pve03");
+        updateMonitor("pve-001");
+        updateMonitor("pve-002");
+        updateMonitor("pve-003");
       }
     </script>
 
@@ -1322,7 +1341,7 @@
         setInterval(updateClock, 1000);
         setInterval(buildCalendar, 60 * 60 * 1000);
 
-        loadLogs("pve01");
+        loadLogs("pve-001");
         setInterval(updateLogs, 3000);
 
         loadVMs();
@@ -1332,7 +1351,7 @@
     <script>
       function migrateVM(node, vmid) {
         const target = prompt(
-        "Vers quel nœud migrer la VM ?\n(pve01, pve02 ou pve03)"
+        "Vers quel nœud migrer la VM ?\n(pve-001, pve-002 ou pve-003)"
         );
 
         if (!target) return;
@@ -1355,6 +1374,423 @@
         });
       }
     </script>
+<script>
+function fetchSingleIP(node, vmid) {
+  fetch(`/vm_ip/${node}/${vmid}`)
+    .then(r => r.json())
+    .then(data => {
+      const el = document.getElementById(`ip-${node}-${vmid}`);
+      if (el) el.textContent = data.ip || "N/A";
+    });
+}
 
+function fetchVMIP() {
+  const select = document.getElementById("ansible-vm-select");
+  const opt = select.options[select.selectedIndex];
+
+  const vmid = opt.value;
+  const node = opt.getAttribute("data-node");
+
+  fetch(`/vm_ip/${node}/${vmid}`)
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById("target-ip").value = data.ip || "";
+    });
+}
+</script>
+<!-- TABLEAU ANSIBLE TOUT EN BAS -->
+<div class="card" id="ansible-bottom-card">
+  <h2 style="text-align:center;">Ansible Playbooks</h2>
+
+  <table class="ansible-table">
+    <thead>
+      <tr>
+        <th>Playbook</th>
+        <th>Description</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>ping.yml</td>
+        <td>Test de connectivité Ansible</td>
+        <td>
+          <button class="external-btn" onclick="runPlay('ping')">
+            Lancer ping.yml
+          </button>
+        </td>
+      </tr>
+      <tr>
+        <td>facts.yml</td>
+        <td>Récupération des facts systèmes</td>
+        <td>
+          <button class="external-btn" onclick="runPlay('facts')">
+            Lancer facts.yml
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 style="margin-top:20px;">Retour du playbook</h3>
+  <pre id="ansible-output" class="ansible-output">En attente…</pre>
+</div>
+
+<style>
+#ansible-bottom-card {
+  margin-bottom: 60px;
+}
+
+.ansible-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.ansible-table th,
+.ansible-table td {
+  padding: 10px;
+  border-bottom: 1px solid #d1d5db;
+  text-align: left;
+}
+
+.ansible-table th {
+  background: #f3f4f6;
+}
+
+.ansible-output {
+  background: #111827;
+  color: #d1fae5;
+  padding: 14px;
+  border-radius: 12px;
+  min-height: 180px;
+  max-height: 450px;
+  overflow: auto;
+  white-space: pre-wrap;
+  font-size: 0.85rem;
+}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm/css/xterm.css">
+<script src="https://cdn.jsdelivr.net/npm/xterm/lib/xterm.js"></script>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+<div id="cli-modal">
+  <div id="cli-window">
+    <div id="cli-header">
+      <div>
+        <h2>Accès CLI VM</h2>
+        <span>Sélectionnez une VM Proxmox pour ouvrir un terminal SSH</span>
+      </div>
+      <button onclick="closeCliModal()">×</button>
+    </div>
+
+    <div id="cli-content">
+      <div id="cli-vm-list">Chargement...</div>
+
+      <div id="cli-terminal-wrap">
+        <div id="cli-terminal-title">
+          <div id="cli-current-vm">Aucune VM sélectionnée</div>
+          <button id="cli-disconnect" onclick="disconnectCli()">Déconnecter</button>
+        </div>
+
+        <div id="cli-terminal"></div>
+
+        <div id="cli-footer">
+          ● En attente de connexion SSH
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.cli-btn {
+  background: linear-gradient(135deg, #22c55e, #84cc16);
+  color: #07111f;
+}
+
+#cli-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.78);
+  z-index: 99999;
+  align-items: center;
+  justify-content: center;
+}
+
+#cli-window {
+  width: 96%;
+  max-width: 1380px;
+  height: 88vh;
+  background: #020617;
+  border: 1px solid #334155;
+  border-radius: 18px;
+  box-shadow: 0 30px 90px rgba(0,0,0,0.55);
+  overflow: hidden;
+}
+
+#cli-header {
+  height: 76px;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  border-bottom: 1px solid #334155;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+}
+
+#cli-header h2 {
+  margin: 0;
+  color: #38bdf8;
+}
+
+#cli-header span {
+  font-size: 0.85rem;
+  color: #93c5fd;
+}
+
+#cli-header button {
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  background: #dc2626;
+  color: white;
+  border-radius: 10px;
+  font-size: 24px;
+  line-height: 42px;
+  text-align: center;
+}
+
+#cli-content {
+  height: calc(100% - 76px);
+  display: flex;
+}
+
+#cli-vm-list {
+  width: 360px;
+  background: linear-gradient(180deg, #0f172a, #111827);
+  border-right: 1px solid #334155;
+  padding: 18px;
+  overflow-y: auto;
+  color: white;
+}
+
+.cli-vm-card {
+  position: relative;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 18px 18px 18px 92px;
+  margin-bottom: 14px;
+  min-height: 88px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.cli-vm-card::before {
+  content: ">_";
+  position: absolute;
+  left: 28px;
+  top: 34px;
+  width: 46px;
+  height: 46px;
+  border: 2px solid #93c5fd;
+  border-radius: 6px;
+  color: #93c5fd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.cli-vm-card::after {
+  content: "";
+  position: absolute;
+  left: 18px;
+  top: 18px;
+  width: 12px;
+  height: 12px;
+  background: #22c55e;
+  border-radius: 999px;
+}
+
+.cli-vm-card:hover,
+.cli-vm-card.active {
+  background: #172554;
+  border-color: #0ea5e9;
+  box-shadow: 0 0 18px rgba(14,165,233,0.45);
+  transform: translateY(-2px);
+}
+
+.cli-vm-card strong {
+  display: block;
+  color: #f8fafc;
+  font-size: 1.05rem;
+  margin-bottom: 6px;
+}
+
+.cli-vm-card span {
+  display: block;
+  font-size: 0.82rem;
+  color: #cbd5e1;
+  margin-top: 3px;
+}
+
+.cli-vm-card .running {
+  color: #22c55e;
+  font-weight: bold;
+}
+
+#cli-terminal-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #020617;
+}
+
+#cli-terminal-title {
+  height: 60px;
+  background: #111827;
+  border-bottom: 1px solid #334155;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+  color: white;
+}
+
+#cli-current-vm {
+  color: #f8fafc;
+  font-weight: bold;
+}
+
+#cli-disconnect {
+  flex: 0 0 auto;
+  width: 130px;
+  padding: 10px;
+  background: #dc2626;
+  color: white;
+  border-radius: 10px;
+}
+
+#cli-terminal {
+  flex: 1;
+  padding: 14px;
+  background: #000;
+}
+
+#cli-footer {
+  height: 42px;
+  background: #111827;
+  border-top: 1px solid #334155;
+  color: #22c55e;
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+  font-size: 0.85rem;
+}
+</style>
+
+<script>
+let cliSocket = io(window.location.origin, {
+  transports: ["polling"]
+});
+let cliTerm = null;
+
+function openCliModal() {
+  document.getElementById("cli-modal").style.display = "flex";
+
+  if (!cliTerm) {
+    cliTerm = new Terminal({
+      cursorBlink: true,
+      fontSize: 14,
+      theme: {
+        background: "#000000",
+        foreground: "#e5e7eb",
+        cursor: "#22c55e"
+      }
+    });
+
+    cliTerm.open(document.getElementById("cli-terminal"));
+
+    cliTerm.onData(data => {
+      cliSocket.emit("cli_input", data);
+    });
+
+    cliSocket.on("cli_output", data => {
+      cliTerm.write(data);
+    });
+  }
+
+  loadCliVMs();
+}
+
+function closeCliModal() {
+  document.getElementById("cli-modal").style.display = "none";
+}
+
+function disconnectCli() {
+  cliTerm.write("\r\nDéconnexion demandée...\r\n");
+  cliSocket.disconnect();
+  cliSocket.connect();
+  document.getElementById("cli-footer").textContent = "● Déconnecté";
+}
+
+function loadCliVMs() {
+  const box = document.getElementById("cli-vm-list");
+  box.innerHTML = "Chargement des VM...";
+
+  fetch("/cli/vms")
+    .then(r => r.json())
+    .then(vms => {
+      box.innerHTML = "";
+
+      vms.forEach(vm => {
+        const div = document.createElement("div");
+        div.className = "cli-vm-card";
+
+        div.innerHTML = `
+          <strong>${vm.name}</strong>
+          <span>VMID : ${vm.vmid}</span>
+          <span>Nœud : ${vm.node}</span>
+          <span class="${vm.status === "running" ? "running" : ""}">
+            État : ${vm.status}
+          </span>
+        `;
+
+        div.onclick = () => {
+          document.querySelectorAll(".cli-vm-card").forEach(card => {
+            card.classList.remove("active");
+          });
+
+          div.classList.add("active");
+
+          document.getElementById("cli-current-vm").textContent =
+            `${vm.name} (VMID: ${vm.vmid})`;
+
+          document.getElementById("cli-footer").textContent =
+            "● Connexion SSH en cours...";
+
+          cliTerm.clear();
+          cliTerm.write(`Connexion à ${vm.name} (${vm.node})...\r\n`);
+
+          cliSocket.emit("cli_connect", {
+            node: vm.node,
+            vmid: vm.vmid
+          });
+        };
+
+        box.appendChild(div);
+      });
+    })
+    .catch(err => {
+      box.innerHTML = "Erreur chargement VM.";
+      console.error(err);
+    });
+}
+</script>
   </body>
 </html>
